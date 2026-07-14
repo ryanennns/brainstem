@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\SignInController;
+use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Projects\DestroyProjectController;
 use App\Http\Controllers\Projects\IndexProjectController;
 use App\Http\Controllers\Projects\ShowProjectController;
@@ -8,6 +10,9 @@ use App\Http\Controllers\ProjectUpdates\IndexProjectUpdateController;
 use App\Http\Controllers\ProjectUpdates\ShowProjectUpdateController;
 use App\Http\Controllers\ProjectUpdates\StoreProjectUpdateController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('sign-up', SignUpController::class);
+Route::post('sign-in', SignInController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('projects')->group(function () {
