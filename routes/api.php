@@ -9,11 +9,17 @@ use App\Http\Controllers\ProjectUpdates\ShowProjectUpdateController;
 use App\Http\Controllers\ProjectUpdates\StoreProjectUpdateController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('projects', IndexProjectController::class);
-Route::post('projects', StoreProjectController::class);
-Route::get('projects/{project}', ShowProjectController::class);
-Route::delete('projects/{project}', DestroyProjectController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('projects')->group(function () {
+        Route::get('/', IndexProjectController::class);
+        Route::post('/', StoreProjectController::class);
+        Route::get('/{project}', ShowProjectController::class);
+        Route::delete('/{project}', DestroyProjectController::class);
+    });
 
-Route::get('project-updates', IndexProjectUpdateController::class);
-Route::post('project-updates', StoreProjectUpdateController::class);
-Route::get('project-updates/{projectUpdate}', ShowProjectUpdateController::class);
+    Route::prefix('project-updates')->group(function () {
+        Route::get('/', IndexProjectUpdateController::class);
+        Route::post('/', StoreProjectUpdateController::class);
+        Route::get('/{projectUpdate}', ShowProjectUpdateController::class);
+    });
+});

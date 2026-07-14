@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class ProjectApiTest extends TestCase
@@ -12,11 +14,15 @@ class ProjectApiTest extends TestCase
 
     public function test_projects_can_be_created_read_and_deleted(): void
     {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
         $created = $this->postJson('/api/projects', [
             'name' => 'Brainstem',
             'description' => 'A project',
         ])->assertCreated()
-            ->assertJsonPath('name', 'Brainstem');
+            ->assertJsonPath('name', 'Brainstem')
+            ->assertJsonPath('user_id', $user->id);
 
         $id = $created->json('id');
 
@@ -36,6 +42,8 @@ class ProjectApiTest extends TestCase
 
     public function test_project_creation_is_validated(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson('/api/projects', [])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('name');
