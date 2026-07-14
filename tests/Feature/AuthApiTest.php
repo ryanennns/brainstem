@@ -36,7 +36,7 @@ class AuthApiTest extends TestCase
             'email' => $user->email,
             'password' => 'password',
         ])->assertOk()
-            ->assertJsonPath('user.id', $user->id);
+            ->assertJsonPath('user.id', $user->getKey());
 
         $this->withToken($response->json('token'))
             ->getJson('/api/projects')

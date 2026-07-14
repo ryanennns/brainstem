@@ -14,7 +14,7 @@ class StoreProjectController extends Controller
         $project = Project::query()->create([...$request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-        ]), 'user_id' => $request->user()->id]);
+        ]), 'user_id' => $request->user()->getKey()]);
 
         return response()->json($project, 201);
     }

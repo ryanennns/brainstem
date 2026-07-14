@@ -16,14 +16,14 @@ class ProjectUpdateApiTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-        $project = Project::query()->create(['name' => 'Brainstem', 'user_id' => $user->id]);
+        $project = Project::query()->create(['name' => 'Brainstem', 'user_id' => $user->getKey()]);
 
         $created = $this->postJson('/api/project-updates', [
-            'project_id' => $project->id,
+            'project_id' => $project->getKey(),
             'type' => 'code_change',
             'summary' => 'Added project update endpoints.',
         ])->assertCreated()
-            ->assertJsonPath('project_id', $project->id);
+            ->assertJsonPath('project_id', $project->getKey());
 
         $id = $created->json('id');
 
@@ -52,11 +52,11 @@ class ProjectUpdateApiTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
         $project = Project::query()->create([
             'name' => 'Someone else\'s project',
-            'user_id' => User::factory()->create()->id,
+            'user_id' => User::factory()->create()->getKey(),
         ]);
 
         $this->postJson('/api/project-updates', [
-            'project_id' => $project->id,
+            'project_id' => $project->getKey(),
             'type' => 'code_change',
             'summary' => 'Not allowed.',
         ])->assertUnprocessable()

@@ -22,7 +22,7 @@ class ProjectApiTest extends TestCase
             'description' => 'A project',
         ])->assertCreated()
             ->assertJsonPath('name', 'Brainstem')
-            ->assertJsonPath('user_id', $user->id);
+            ->assertJsonPath('user_id', $user->getKey());
 
         $id = $created->json('id');
 
