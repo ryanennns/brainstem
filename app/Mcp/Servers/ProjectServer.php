@@ -8,6 +8,7 @@ use App\Mcp\Tools\GetProject;
 use App\Mcp\Tools\HelloWorld;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\SearchProjects;
+use App\Mcp\Tools\UpdateProject;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -25,5 +26,6 @@ class ProjectServer extends Server
         HelloWorld::class,
         ListProjects::class,
         SearchProjects::class,
+        UpdateProject::class,
     ];
 }

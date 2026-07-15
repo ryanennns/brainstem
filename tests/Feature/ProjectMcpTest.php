@@ -8,6 +8,7 @@ use App\Mcp\Tools\CreateProjectUpdate;
 use App\Mcp\Tools\GetProject;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\SearchProjects;
+use App\Mcp\Tools\UpdateProject;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -98,5 +99,29 @@ class ProjectMcpTest extends TestCase
         ProjectServer::actingAs($user)->tool(SearchProjects::class, ['query' => 'Brain'])
             ->assertOk()
             ->assertSee('Brainstem');
+    }
+
+    public function test_projects_can_only_update_their_name_and_description(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::query()->create([
+            'name' => 'Before',
+            'description' => 'Before description',
+            'user_id' => $user->getKey(),
+        ]);
+
+        ProjectServer::actingAs($user)->tool(UpdateProject::class, [
+            'project_id' => $project->getKey(),
+            'name' => 'After',
+            'description' => 'After description',
+        ])->assertOk()
+            ->assertSee('After');
+
+        $this->assertDatabaseHas('projects', [
+            'id' => $project->getKey(),
+            'name' => 'After',
+            'description' => 'After description',
+            'user_id' => $user->getKey(),
+        ]);
     }
 }
