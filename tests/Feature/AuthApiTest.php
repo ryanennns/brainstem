@@ -14,11 +14,11 @@ class AuthApiTest extends TestCase
     {
         $response = $this->postJson('/api/sign-up', [
             'name' => 'Ryan',
-            'email' => 'ryanenns@gmail.com',
+            'email' => 'ryanennns@gmail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertCreated()
-            ->assertJsonPath('user.email', 'ryanenns@gmail.com')
+            ->assertJsonPath('user.email', 'ryanennns@gmail.com')
             ->assertJsonMissingPath('user.password');
 
         $this->withToken($response->json('token'))

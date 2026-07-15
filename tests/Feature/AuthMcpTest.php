@@ -17,12 +17,12 @@ class AuthMcpTest extends TestCase
     {
         AuthServer::tool(SignUp::class, [
             'name' => 'Ryan',
-            'email' => 'ryanenns@gmail.com',
+            'email' => 'ryanennns@gmail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertOk();
 
-        $this->assertDatabaseHas('users', ['email' => 'ryanenns@gmail.com']);
+        $this->assertDatabaseHas('users', ['email' => 'ryanennns@gmail.com']);
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
