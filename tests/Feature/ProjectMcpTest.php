@@ -100,7 +100,7 @@ class ProjectMcpTest extends TestCase
         Project::query()->create(['name' => 'Brainstem', 'user_id' => $user->getKey()]);
         Project::query()->create(['name' => 'Unrelated', 'user_id' => $user->getKey()]);
 
-        ProjectServer::actingAs($user)->tool(SearchProjects::class, ['query' => 'Brain'])
+        ProjectServer::actingAs($user)->tool(SearchProjects::class, ['query' => 'brain'])
             ->assertOk()
             ->assertSee('Brainstem');
     }
