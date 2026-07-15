@@ -9,6 +9,6 @@ class ShowProjectController extends Controller
 {
     public function __invoke(Project $project): Project
     {
-        return $project;
+        return Project::query()->with('repository')->findOrFail($project->getKey());
     }
 }

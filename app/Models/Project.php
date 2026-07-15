@@ -20,6 +20,11 @@ class Project extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function repository(): BelongsTo
+    {
+        return $this->belongsTo(Repository::class);
+    }
+
     public function updates(): HasMany
     {
         return $this->hasMany(ProjectUpdate::class);
@@ -28,7 +33,7 @@ class Project extends Model
     protected function casts(): array
     {
         return [
-            'git_branches' => 'array',
+            'working_branches' => 'array',
         ];
     }
 }

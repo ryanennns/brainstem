@@ -23,7 +23,9 @@ class ProjectsTable
                 TextColumn::make('user.email')
                     ->label('Owner')
                     ->searchable(),
-                TextColumn::make('git_branches')
+                TextColumn::make('repository.name')
+                    ->searchable(),
+                TextColumn::make('working_branches')
                     ->badge()
                     ->listWithLineBreaks(),
                 TextColumn::make('created_at')

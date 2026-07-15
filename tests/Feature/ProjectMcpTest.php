@@ -12,6 +12,7 @@ use App\Mcp\Tools\SearchProjects;
 use App\Mcp\Tools\UpdateProject;
 use App\Models\Project;
 use App\Models\ProjectUpdate;
+use App\Models\Repository;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -23,11 +24,17 @@ class ProjectMcpTest extends TestCase
     public function test_projects_and_updates_can_be_created(): void
     {
         $user = User::factory()->create();
+        $repository = Repository::query()->create([
+            'name' => 'brainstem',
+            'default_branch' => 'main',
+            'user_id' => $user->getKey(),
+        ]);
 
         ProjectServer::actingAs($user)->tool(CreateProject::class, [
             'name' => 'Brainstem',
             'description' => 'Agent project',
-            'git_branches' => ['main'],
+            'repository_id' => $repository->getKey(),
+            'working_branches' => ['feature/mcp'],
         ])->assertOk();
 
         $project = Project::query()->firstOrFail();
@@ -39,7 +46,9 @@ class ProjectMcpTest extends TestCase
         ])->assertOk();
 
         $this->assertDatabaseHas('projects', ['user_id' => $user->getKey()]);
-        $this->assertSame(['main'], $project->fresh()->git_branches);
+        $project = Project::query()->with('repository')->findOrFail($project->getKey());
+        $this->assertSame(['feature/mcp'], $project->working_branches);
+        $this->assertSame($repository->getKey(), $project->repository->getKey());
         $this->assertDatabaseHas('project_updates', ['project_id' => $project->getKey()]);
     }
 
@@ -105,9 +114,13 @@ class ProjectMcpTest extends TestCase
             ->assertSee('Brainstem');
     }
 
-    public function test_projects_can_update_their_details_and_git_branches(): void
+    public function test_projects_can_update_their_details_repository_and_working_branches(): void
     {
         $user = User::factory()->create();
+        $repository = Repository::query()->create([
+            'name' => 'brainstem',
+            'user_id' => $user->getKey(),
+        ]);
         $project = Project::query()->create([
             'name' => 'Before',
             'description' => 'Before description',
@@ -118,7 +131,8 @@ class ProjectMcpTest extends TestCase
             'project_id' => $project->getKey(),
             'name' => 'After',
             'description' => 'After description',
-            'git_branches' => ['main', 'feature/mcp'],
+            'repository_id' => $repository->getKey(),
+            'working_branches' => ['feature/mcp'],
         ])->assertOk()
             ->assertSee('After');
 
@@ -128,7 +142,24 @@ class ProjectMcpTest extends TestCase
             'description' => 'After description',
             'user_id' => $user->getKey(),
         ]);
-        $this->assertSame(['main', 'feature/mcp'], $project->fresh()->git_branches);
+        $project = Project::query()->findOrFail($project->getKey());
+        $this->assertSame(['feature/mcp'], $project->working_branches);
+        $this->assertSame($repository->getKey(), $project->repository_id);
+    }
+
+    public function test_projects_cannot_use_another_users_repository(): void
+    {
+        $repository = Repository::query()->create([
+            'name' => 'Private',
+            'user_id' => User::factory()->create()->getKey(),
+        ]);
+
+        ProjectServer::actingAs(User::factory()->create())->tool(CreateProject::class, [
+            'name' => 'Not allowed',
+            'repository_id' => $repository->getKey(),
+        ])->assertHasErrors(['Repository not found.']);
+
+        $this->assertDatabaseCount('projects', 0);
     }
 
     public function test_project_updates_can_be_retrieved(): void

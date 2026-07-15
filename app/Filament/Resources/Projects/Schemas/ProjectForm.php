@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Projects\Schemas;
 
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class ProjectForm
@@ -18,7 +18,11 @@ class ProjectForm
                     ->required(),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                TagsInput::make('git_branches')
+                Select::make('repository_id')
+                    ->relationship('repository', 'name')
+                    ->searchable()
+                    ->preload(),
+                TagsInput::make('working_branches')
                     ->separator(',')
                     ->columnSpanFull(),
                 Select::make('user_id')

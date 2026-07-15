@@ -10,6 +10,6 @@ class IndexProjectController extends Controller
 {
     public function __invoke(): LengthAwarePaginator
     {
-        return Project::query()->paginate();
+        return Project::query()->with('repository')->paginate();
     }
 }
