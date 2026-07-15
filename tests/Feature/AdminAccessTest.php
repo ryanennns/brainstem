@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Projects\Pages\ViewProject;
+use App\Filament\Resources\Projects\RelationManagers\UpdatesRelationManager;
 use App\Models\Project;
 use App\Models\ProjectUpdate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class AdminAccessTest extends TestCase
@@ -35,6 +38,10 @@ class AdminAccessTest extends TestCase
         ]);
 
         $this->actingAs($admin)->get("/admin/projects/{$project->getKey()}")->assertOk();
+        Livewire::test(UpdatesRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ViewProject::class,
+        ])->assertCanSeeTableRecords([$update]);
         $this->actingAs($admin)->get("/admin/project-updates/{$update->getKey()}")->assertOk();
     }
 }
