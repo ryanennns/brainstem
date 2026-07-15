@@ -2,5 +2,5 @@
 url = "https://brainstem.enns.dev/mcp/auth"
 
 [mcp_servers.brainstem_projects]
-url = "https://brainstem.enns.dev/mcp/hello-world"
-bearer_token_env_var = "BRAINSTEM_TOKEN"
+url = "https://brainstem.enns.dev/mcp/projects"
+bearer_token_env_var = "BRAINSTEM_API_TOKEN"
