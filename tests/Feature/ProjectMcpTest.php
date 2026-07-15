@@ -5,6 +5,9 @@ namespace Tests\Feature;
 use App\Mcp\Servers\ProjectServer;
 use App\Mcp\Tools\CreateProject;
 use App\Mcp\Tools\CreateProjectUpdate;
+use App\Mcp\Tools\GetProject;
+use App\Mcp\Tools\ListProjects;
+use App\Mcp\Tools\SearchProjects;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,5 +53,50 @@ class ProjectMcpTest extends TestCase
         ])->assertHasErrors(['Project not found.']);
 
         $this->assertDatabaseCount('project_updates', 0);
+    }
+
+    public function test_projects_can_be_listed_and_retrieved(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::query()->create([
+            'name' => 'Visible',
+            'user_id' => $user->getKey(),
+        ]);
+        Project::query()->create([
+            'name' => 'Hidden',
+            'user_id' => User::factory()->create()->getKey(),
+        ]);
+
+        ProjectServer::actingAs($user)->tool(ListProjects::class)
+            ->assertOk()
+            ->assertSee('Visible');
+
+        ProjectServer::actingAs($user)->tool(GetProject::class, [
+            'project_id' => $project->getKey(),
+        ])->assertOk()
+            ->assertSee('Visible');
+    }
+
+    public function test_projects_cannot_be_retrieved_by_another_user(): void
+    {
+        $project = Project::query()->create([
+            'name' => 'Private',
+            'user_id' => User::factory()->create()->getKey(),
+        ]);
+
+        ProjectServer::actingAs(User::factory()->create())->tool(GetProject::class, [
+            'project_id' => $project->getKey(),
+        ])->assertHasErrors(['Project not found.']);
+    }
+
+    public function test_projects_can_be_searched_by_name(): void
+    {
+        $user = User::factory()->create();
+        Project::query()->create(['name' => 'Brainstem', 'user_id' => $user->getKey()]);
+        Project::query()->create(['name' => 'Unrelated', 'user_id' => $user->getKey()]);
+
+        ProjectServer::actingAs($user)->tool(SearchProjects::class, ['query' => 'Brain'])
+            ->assertOk()
+            ->assertSee('Brainstem');
     }
 }

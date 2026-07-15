@@ -4,7 +4,10 @@ namespace App\Mcp\Servers;
 
 use App\Mcp\Tools\CreateProject;
 use App\Mcp\Tools\CreateProjectUpdate;
+use App\Mcp\Tools\GetProject;
 use App\Mcp\Tools\HelloWorld;
+use App\Mcp\Tools\ListProjects;
+use App\Mcp\Tools\SearchProjects;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -18,6 +21,9 @@ class ProjectServer extends Server
     protected array $tools = [
         CreateProject::class,
         CreateProjectUpdate::class,
+        GetProject::class,
         HelloWorld::class,
+        ListProjects::class,
+        SearchProjects::class,
     ];
 }
