@@ -6,10 +6,12 @@ use App\Mcp\Servers\ProjectServer;
 use App\Mcp\Tools\CreateProject;
 use App\Mcp\Tools\CreateProjectUpdate;
 use App\Mcp\Tools\GetProject;
+use App\Mcp\Tools\GetProjectUpdates;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\SearchProjects;
 use App\Mcp\Tools\UpdateProject;
 use App\Models\Project;
+use App\Models\ProjectUpdate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -123,5 +125,24 @@ class ProjectMcpTest extends TestCase
             'description' => 'After description',
             'user_id' => $user->getKey(),
         ]);
+    }
+
+    public function test_project_updates_can_be_retrieved(): void
+    {
+        $user = User::factory()->create();
+        $project = Project::query()->create([
+            'name' => 'Brainstem',
+            'user_id' => $user->getKey(),
+        ]);
+        ProjectUpdate::query()->create([
+            'project_id' => $project->getKey(),
+            'type' => 'code_change',
+            'summary' => 'Added update retrieval.',
+        ]);
+
+        ProjectServer::actingAs($user)->tool(GetProjectUpdates::class, [
+            'project_id' => $project->getKey(),
+        ])->assertOk()
+            ->assertSee('Added update retrieval.');
     }
 }

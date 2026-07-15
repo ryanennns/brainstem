@@ -5,6 +5,7 @@ namespace App\Mcp\Servers;
 use App\Mcp\Tools\CreateProject;
 use App\Mcp\Tools\CreateProjectUpdate;
 use App\Mcp\Tools\GetProject;
+use App\Mcp\Tools\GetProjectUpdates;
 use App\Mcp\Tools\HelloWorld;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\SearchProjects;
@@ -23,6 +24,7 @@ class ProjectServer extends Server
         CreateProject::class,
         CreateProjectUpdate::class,
         GetProject::class,
+        GetProjectUpdates::class,
         HelloWorld::class,
         ListProjects::class,
         SearchProjects::class,
