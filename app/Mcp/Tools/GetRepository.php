@@ -2,32 +2,31 @@
 
 namespace App\Mcp\Tools;
 
-use App\Models\Project;
+use App\Models\Repository;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Get a project owned by the authenticated user.')]
-class GetProject extends Tool
+#[Description('Get a repository owned by the authenticated user.')]
+class GetRepository extends Tool
 {
     public function handle(Request $request): Response
     {
-        $project = Project::query()
-            ->with('repository')
-            ->whereKey($request->validate(['project_id' => ['required', 'uuid']])['project_id'])
+        $repository = Repository::query()
+            ->whereKey($request->validate(['repository_id' => ['required', 'uuid']])['repository_id'])
             ->where('user_id', $request->user()->getKey())
             ->first();
 
-        return $project ? Response::json($project) : Response::error('Project not found.');
+        return $repository ? Response::json($repository) : Response::error('Repository not found.');
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
-            'project_id' => $schema->string()
-                ->description('The project UUID.')
+            'repository_id' => $schema->string()
+                ->description('The repository UUID.')
                 ->required(),
         ];
     }

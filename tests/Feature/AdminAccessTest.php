@@ -21,6 +21,7 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->create(['email' => 'not-admin@example.com']);
 
         $this->actingAs($admin)->get('/admin')->assertOk();
+        $this->actingAs($admin)->get('/admin/repositories')->assertOk();
         $this->actingAs($user)->get('/admin')->assertForbidden();
     }
 
