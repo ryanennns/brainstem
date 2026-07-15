@@ -18,7 +18,7 @@ class SearchProjects extends Tool
 
         $projects = Project::query()
             ->where('user_id', $request->user()->getKey())
-            ->where('name', 'like', "%{$query}%")
+            ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($query).'%'])
             ->paginate();
 
         return Response::json($projects);
