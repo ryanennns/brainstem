@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Project;
+use App\Models\ProjectUpdate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,5 +19,22 @@ class AdminAccessTest extends TestCase
 
         $this->actingAs($admin)->get('/admin')->assertOk();
         $this->actingAs($user)->get('/admin')->assertForbidden();
+    }
+
+    public function test_administrators_can_view_projects_and_project_updates(): void
+    {
+        $admin = User::factory()->create(['email' => 'ryanennns@gmail.com']);
+        $project = Project::query()->create([
+            'name' => 'Brainstem',
+            'user_id' => $admin->getKey(),
+        ]);
+        $update = ProjectUpdate::query()->create([
+            'project_id' => $project->getKey(),
+            'type' => 'code_change',
+            'summary' => 'Added the admin panel.',
+        ]);
+
+        $this->actingAs($admin)->get("/admin/projects/{$project->getKey()}")->assertOk();
+        $this->actingAs($admin)->get("/admin/project-updates/{$update->getKey()}")->assertOk();
     }
 }

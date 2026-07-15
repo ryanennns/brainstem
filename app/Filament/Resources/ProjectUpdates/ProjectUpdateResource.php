@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ProjectUpdates;
 use App\Filament\Resources\ProjectUpdates\Pages\CreateProjectUpdate;
 use App\Filament\Resources\ProjectUpdates\Pages\EditProjectUpdate;
 use App\Filament\Resources\ProjectUpdates\Pages\ListProjectUpdates;
+use App\Filament\Resources\ProjectUpdates\Pages\ViewProjectUpdate;
 use App\Filament\Resources\ProjectUpdates\Schemas\ProjectUpdateForm;
 use App\Filament\Resources\ProjectUpdates\Tables\ProjectUpdatesTable;
 use App\Models\ProjectUpdate;
@@ -44,6 +45,7 @@ class ProjectUpdateResource extends Resource
         return [
             'index' => ListProjectUpdates::route('/'),
             'create' => CreateProjectUpdate::route('/create'),
+            'view' => ViewProjectUpdate::route('/{record}'),
             'edit' => EditProjectUpdate::route('/{record}/edit'),
         ];
     }

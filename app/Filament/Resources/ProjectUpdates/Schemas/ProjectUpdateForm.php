@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ProjectUpdates\Schemas;
 
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
 class ProjectUpdateForm
@@ -29,4 +30,3 @@ class ProjectUpdateForm
             ]);
     }
 }
-use Filament\Forms\Components\Select;
