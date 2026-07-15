@@ -9,7 +9,7 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Create a project owned by the authenticated user.')]
+#[Description('Create a project owned by the authenticated user, including its known Git branches.')]
 class CreateProject extends Tool
 {
     public function handle(Request $request): Response
@@ -18,6 +18,8 @@ class CreateProject extends Tool
             ...$request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'description' => ['nullable', 'string'],
+                'git_branches' => ['sometimes', 'array'],
+                'git_branches.*' => ['string'],
             ]),
             'user_id' => $request->user()->getKey(),
         ]);
@@ -33,6 +35,9 @@ class CreateProject extends Tool
                 ->required(),
             'description' => $schema->string()
                 ->description('An optional project description.'),
+            'git_branches' => $schema->array()
+                ->items($schema->string())
+                ->description('Known Git branch names for this project.'),
         ];
     }
 }

@@ -12,4 +12,11 @@ class Project extends Model
     use HasUuids;
 
     protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'git_branches' => 'array',
+        ];
+    }
 }

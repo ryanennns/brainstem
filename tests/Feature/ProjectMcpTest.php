@@ -27,6 +27,7 @@ class ProjectMcpTest extends TestCase
         ProjectServer::actingAs($user)->tool(CreateProject::class, [
             'name' => 'Brainstem',
             'description' => 'Agent project',
+            'git_branches' => ['main'],
         ])->assertOk();
 
         $project = Project::query()->firstOrFail();
@@ -38,6 +39,7 @@ class ProjectMcpTest extends TestCase
         ])->assertOk();
 
         $this->assertDatabaseHas('projects', ['user_id' => $user->getKey()]);
+        $this->assertSame(['main'], $project->fresh()->git_branches);
         $this->assertDatabaseHas('project_updates', ['project_id' => $project->getKey()]);
     }
 
@@ -103,7 +105,7 @@ class ProjectMcpTest extends TestCase
             ->assertSee('Brainstem');
     }
 
-    public function test_projects_can_only_update_their_name_and_description(): void
+    public function test_projects_can_update_their_details_and_git_branches(): void
     {
         $user = User::factory()->create();
         $project = Project::query()->create([
@@ -116,6 +118,7 @@ class ProjectMcpTest extends TestCase
             'project_id' => $project->getKey(),
             'name' => 'After',
             'description' => 'After description',
+            'git_branches' => ['main', 'feature/mcp'],
         ])->assertOk()
             ->assertSee('After');
 
@@ -125,6 +128,7 @@ class ProjectMcpTest extends TestCase
             'description' => 'After description',
             'user_id' => $user->getKey(),
         ]);
+        $this->assertSame(['main', 'feature/mcp'], $project->fresh()->git_branches);
     }
 
     public function test_project_updates_can_be_retrieved(): void

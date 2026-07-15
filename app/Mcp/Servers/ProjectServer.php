@@ -17,7 +17,7 @@ use Laravel\Mcp\Server\Attributes\Version;
 
 #[Name('Project Server')]
 #[Version('0.0.1')]
-#[Instructions('Create projects and append updates to projects owned by the authenticated user.')]
+#[Instructions('Create and manage projects owned by the authenticated user. Keep git_branches current whenever you create, switch, or remove a project branch.')]
 class ProjectServer extends Server
 {
     protected array $tools = [

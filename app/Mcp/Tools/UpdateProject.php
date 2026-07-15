@@ -9,7 +9,7 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Update a project name or description owned by the authenticated user.')]
+#[Description('Update a project name, description, or known Git branches owned by the authenticated user.')]
 class UpdateProject extends Tool
 {
     public function handle(Request $request): Response
@@ -18,6 +18,8 @@ class UpdateProject extends Tool
             'project_id' => ['required', 'uuid'],
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
+            'git_branches' => ['sometimes', 'array'],
+            'git_branches.*' => ['string'],
         ]);
 
         $project = Project::query()
@@ -32,7 +34,7 @@ class UpdateProject extends Tool
         unset($validated['project_id']);
 
         if ($validated === []) {
-            return Response::error('Provide a name or description.');
+            return Response::error('Provide a name, description, or git branches.');
         }
 
         $project->update($validated);
@@ -51,6 +53,9 @@ class UpdateProject extends Tool
             'description' => $schema->string()
                 ->nullable()
                 ->description('The replacement project description.'),
+            'git_branches' => $schema->array()
+                ->items($schema->string())
+                ->description('The complete current list of Git branch names.'),
         ];
     }
 }
