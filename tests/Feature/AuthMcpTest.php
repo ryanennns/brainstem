@@ -17,12 +17,12 @@ class AuthMcpTest extends TestCase
     {
         AuthServer::tool(SignUp::class, [
             'name' => 'Ryan',
-            'email' => 'ryan@example.com',
+            'email' => 'ryanenns@gmail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertOk();
 
-        $this->assertDatabaseHas('users', ['email' => 'ryan@example.com']);
+        $this->assertDatabaseHas('users', ['email' => 'ryanenns@gmail.com']);
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
@@ -36,5 +36,17 @@ class AuthMcpTest extends TestCase
         ])->assertOk();
 
         $this->assertDatabaseCount('personal_access_tokens', 1);
+    }
+
+    public function test_sign_up_rejects_emails_outside_the_whitelist(): void
+    {
+        AuthServer::tool(SignUp::class, [
+            'name' => 'Not Ryan',
+            'email' => 'not-ryan@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertHasErrors();
+
+        $this->assertDatabaseCount('users', 0);
     }
 }

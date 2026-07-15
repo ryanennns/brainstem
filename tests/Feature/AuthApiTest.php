@@ -14,11 +14,11 @@ class AuthApiTest extends TestCase
     {
         $response = $this->postJson('/api/sign-up', [
             'name' => 'Ryan',
-            'email' => 'ryan@example.com',
+            'email' => 'ryanenns@gmail.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ])->assertCreated()
-            ->assertJsonPath('user.email', 'ryan@example.com')
+            ->assertJsonPath('user.email', 'ryanenns@gmail.com')
             ->assertJsonMissingPath('user.password');
 
         $this->withToken($response->json('token'))
@@ -56,5 +56,18 @@ class AuthApiTest extends TestCase
             ->assertJsonValidationErrors('email');
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_sign_up_rejects_emails_outside_the_whitelist(): void
+    {
+        $this->postJson('/api/sign-up', [
+            'name' => 'Not Ryan',
+            'email' => 'not-ryan@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('email');
+
+        $this->assertDatabaseCount('users', 0);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Mcp\Tools;
 
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -16,7 +17,14 @@ class SignUp extends Tool
     {
         $user = User::query()->create($request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'lowercase', 'max:255', 'unique:users'],
+            'email' => [
+                'required',
+                'email',
+                'lowercase',
+                'max:255',
+                'unique:users',
+                Rule::in(config('registration.email_whitelist')),
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]));
 
