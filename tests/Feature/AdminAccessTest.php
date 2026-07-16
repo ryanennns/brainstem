@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Ai\Agents\ProjectSummarizer;
 use App\Filament\Resources\Projects\Pages\ViewProject;
 use App\Filament\Resources\Projects\RelationManagers\UpdatesRelationManager;
+use App\Livewire\ProjectSummary;
 use App\Models\Project;
 use App\Models\ProjectAgentSession;
 use App\Models\ProjectUpdate;
@@ -58,10 +59,14 @@ class AdminAccessTest extends TestCase
             ->assertOk()
             ->assertSee('Brainstem')
             ->assertSee('An agent project tracker.')
+            ->assertSee('Generating summary')
+            ->assertDontSee('The admin panel is now available.');
+
+        ProjectSummarizer::assertNeverPrompted();
+
+        Livewire::test(ProjectSummary::class, ['record' => $project])
             ->assertSee('The admin panel is now available.');
-        $this->actingAs($admin)
-            ->get("/admin/projects/{$project->getKey()}")
-            ->assertOk()
+        Livewire::test(ProjectSummary::class, ['record' => $project])
             ->assertSee('The admin panel is now available.');
 
         ProjectUpdate::query()->create([
@@ -71,9 +76,7 @@ class AdminAccessTest extends TestCase
             'summary' => 'Added cached AI summaries.',
         ]);
 
-        $this->actingAs($admin)
-            ->get("/admin/projects/{$project->getKey()}")
-            ->assertOk()
+        Livewire::test(ProjectSummary::class, ['record' => $project])
             ->assertSee('The admin panel and cached AI summaries are now available.');
         Livewire::test(UpdatesRelationManager::class, [
             'ownerRecord' => $project,
@@ -94,6 +97,11 @@ class AdminAccessTest extends TestCase
         $this->actingAs($admin)
             ->get("/admin/projects/{$project->getKey()}")
             ->assertOk()
+            ->assertSee('Generating summary');
+
+        ProjectSummarizer::assertNeverPrompted();
+
+        Livewire::test(ProjectSummary::class, ['record' => $project])
             ->assertSee('No project updates yet.');
 
         ProjectSummarizer::assertNeverPrompted();
