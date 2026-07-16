@@ -6,6 +6,7 @@ use App\Ai\Agents\ProjectSummarizer;
 use App\Filament\Resources\Projects\Pages\ViewProject;
 use App\Filament\Resources\Projects\RelationManagers\UpdatesRelationManager;
 use App\Models\Project;
+use App\Models\ProjectAgentSession;
 use App\Models\ProjectUpdate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,8 +41,14 @@ class AdminAccessTest extends TestCase
             'description' => 'An agent project tracker.',
             'user_id' => $admin->getKey(),
         ]);
+        $agentSession = ProjectAgentSession::query()->create([
+            'project_id' => $project->getKey(),
+            'agent' => 'codex',
+            'session_id' => 'session-123',
+        ]);
         $update = ProjectUpdate::query()->create([
             'project_id' => $project->getKey(),
+            'project_agent_session_id' => $agentSession->getKey(),
             'type' => 'code_change',
             'summary' => 'Added the admin panel.',
         ]);
@@ -59,6 +66,7 @@ class AdminAccessTest extends TestCase
 
         ProjectUpdate::query()->create([
             'project_id' => $project->getKey(),
+            'project_agent_session_id' => $agentSession->getKey(),
             'type' => 'code_change',
             'summary' => 'Added cached AI summaries.',
         ]);

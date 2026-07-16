@@ -18,4 +18,9 @@ class ProjectUpdate extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+    public function agentSession(): BelongsTo
+    {
+        return $this->belongsTo(ProjectAgentSession::class, 'project_agent_session_id');
+    }
 }

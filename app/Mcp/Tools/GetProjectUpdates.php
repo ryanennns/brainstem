@@ -25,6 +25,7 @@ class GetProjectUpdates extends Tool
         }
 
         return Response::json(ProjectUpdate::query()
+            ->with('agentSession')
             ->where('project_id', $project->getKey())
             ->paginate());
     }

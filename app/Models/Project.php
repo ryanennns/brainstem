@@ -30,6 +30,11 @@ class Project extends Model
         return $this->hasMany(ProjectUpdate::class);
     }
 
+    public function agentSessions(): HasMany
+    {
+        return $this->hasMany(ProjectAgentSession::class);
+    }
+
     protected function casts(): array
     {
         return [

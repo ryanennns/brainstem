@@ -9,6 +9,6 @@ class ShowProjectUpdateController extends Controller
 {
     public function __invoke(ProjectUpdate $projectUpdate): ProjectUpdate
     {
-        return $projectUpdate;
+        return $projectUpdate->load('agentSession');
     }
 }

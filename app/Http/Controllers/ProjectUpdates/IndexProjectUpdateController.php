@@ -10,6 +10,6 @@ class IndexProjectUpdateController extends Controller
 {
     public function __invoke(): LengthAwarePaginator
     {
-        return ProjectUpdate::query()->paginate();
+        return ProjectUpdate::query()->with('agentSession')->paginate();
     }
 }

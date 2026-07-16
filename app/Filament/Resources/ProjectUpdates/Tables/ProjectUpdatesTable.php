@@ -23,6 +23,12 @@ class ProjectUpdatesTable
                 TextColumn::make('project.name')
                     ->label('Project')
                     ->searchable(),
+                TextColumn::make('agentSession.agent')
+                    ->label('Agent')
+                    ->searchable(),
+                TextColumn::make('agentSession.session_id')
+                    ->label('Session ID')
+                    ->searchable(),
                 TextColumn::make('summary')
                     ->limit(80)
                     ->searchable(),

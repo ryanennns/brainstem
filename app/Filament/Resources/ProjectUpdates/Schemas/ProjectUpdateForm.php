@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\ProjectUpdates\Schemas;
 
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 
 class ProjectUpdateForm
@@ -12,6 +12,17 @@ class ProjectUpdateForm
     {
         return $schema
             ->components([
+                Select::make('project_id')
+                    ->relationship('project', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Select::make('project_agent_session_id')
+                    ->label('Agent session')
+                    ->relationship('agentSession', 'session_id')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 Select::make('type')
                     ->options([
                         'code_change' => 'Code change',
@@ -22,11 +33,6 @@ class ProjectUpdateForm
                 Textarea::make('summary')
                     ->required()
                     ->columnSpanFull(),
-                Select::make('project_id')
-                    ->relationship('project', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->required(),
             ]);
     }
 }

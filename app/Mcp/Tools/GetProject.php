@@ -15,7 +15,7 @@ class GetProject extends Tool
     public function handle(Request $request): Response
     {
         $project = Project::query()
-            ->with('repository')
+            ->with(['repository', 'agentSessions'])
             ->whereKey($request->validate(['project_id' => ['required', 'uuid']])['project_id'])
             ->where('user_id', $request->user()->getKey())
             ->first();
