@@ -11,6 +11,7 @@ use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\SearchProjects;
 use App\Mcp\Tools\UpdateProject;
 use App\Models\Project;
+use App\Models\ProjectAgentSession;
 use App\Models\ProjectUpdate;
 use App\Models\Repository;
 use App\Models\User;
@@ -41,15 +42,23 @@ class ProjectMcpTest extends TestCase
 
         ProjectServer::actingAs($user)->tool(CreateProjectUpdate::class, [
             'project_id' => $project->getKey(),
+            'agent' => 'codex',
+            'agent_session_id' => 'session-123',
             'type' => 'code_change',
             'summary' => 'Added MCP tools.',
-        ])->assertOk();
+        ])->assertOk()
+            ->assertSee('session-123');
 
         $this->assertDatabaseHas('projects', ['user_id' => $user->getKey()]);
         $project = Project::query()->with('repository')->findOrFail($project->getKey());
         $this->assertSame(['feature/mcp'], $project->working_branches);
         $this->assertSame($repository->getKey(), $project->repository->getKey());
         $this->assertDatabaseHas('project_updates', ['project_id' => $project->getKey()]);
+        $this->assertDatabaseHas('project_agent_sessions', [
+            'project_id' => $project->getKey(),
+            'agent' => 'codex',
+            'session_id' => 'session-123',
+        ]);
     }
 
     public function test_updates_cannot_be_created_for_another_users_project(): void
@@ -62,6 +71,8 @@ class ProjectMcpTest extends TestCase
 
         ProjectServer::actingAs(User::factory()->create())->tool(CreateProjectUpdate::class, [
             'project_id' => $project->getKey(),
+            'agent' => 'codex',
+            'agent_session_id' => 'session-123',
             'type' => 'miscellaneous',
             'summary' => 'Not allowed.',
         ])->assertHasErrors(['Project not found.']);
@@ -169,8 +180,14 @@ class ProjectMcpTest extends TestCase
             'name' => 'Brainstem',
             'user_id' => $user->getKey(),
         ]);
+        $agentSession = ProjectAgentSession::query()->create([
+            'project_id' => $project->getKey(),
+            'agent' => 'codex',
+            'session_id' => 'session-123',
+        ]);
         ProjectUpdate::query()->create([
             'project_id' => $project->getKey(),
+            'project_agent_session_id' => $agentSession->getKey(),
             'type' => 'code_change',
             'summary' => 'Added update retrieval.',
         ]);
@@ -178,6 +195,7 @@ class ProjectMcpTest extends TestCase
         ProjectServer::actingAs($user)->tool(GetProjectUpdates::class, [
             'project_id' => $project->getKey(),
         ])->assertOk()
-            ->assertSee('Added update retrieval.');
+            ->assertSee('Added update retrieval.')
+            ->assertSee('session-123');
     }
 }

@@ -22,7 +22,7 @@ use Laravel\Mcp\Server\Attributes\Version;
 
 #[Name('Project Server')]
 #[Version('0.0.1')]
-#[Instructions('Repositories are durable codebases; projects are units of work. Store the repository default branch on its repository. Keep project working_branches limited to feature branches used for that work, and leave them empty when a project represents the whole repository.')]
+#[Instructions('Repositories are durable codebases; projects are units of work. Store the repository default branch on its repository. Keep project working_branches limited to feature branches used for that work, and leave them empty when a project represents the whole repository. Every project update must include the current agent client name and its stable session ID.')]
 class ProjectServer extends Server
 {
     protected array $tools = [
