@@ -42,10 +42,17 @@ class RepositoryResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->formatStateUsing(fn (string $state): string => explode('-', $state, 2)[0])
+                    ->searchable(),
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('remote_url')->label('Remote URL')->searchable(),
                 TextColumn::make('default_branch'),
                 TextColumn::make('user.email')->label('Owner')->searchable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -17,6 +17,7 @@ class ProjectsTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
+                    ->formatStateUsing(fn (string $state): string => explode('-', $state, 2)[0])
                     ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
@@ -30,8 +31,7 @@ class ProjectsTable
                     ->listWithLineBreaks(),
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

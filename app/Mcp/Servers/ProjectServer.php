@@ -13,6 +13,7 @@ use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\ListRepositories;
 use App\Mcp\Tools\SearchProjects;
 use App\Mcp\Tools\SearchRepositories;
+use App\Mcp\Tools\SendSms;
 use App\Mcp\Tools\UpdateProject;
 use App\Mcp\Tools\UpdateRepository;
 use Laravel\Mcp\Server;
@@ -37,6 +38,7 @@ class ProjectServer extends Server
         ListRepositories::class,
         SearchProjects::class,
         SearchRepositories::class,
+        SendSms::class,
         UpdateProject::class,
         UpdateRepository::class,
     ];

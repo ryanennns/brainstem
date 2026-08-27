@@ -4,3 +4,7 @@ url = "https://brainstem.enns.dev/mcp/auth"
 [mcp_servers.brainstem_projects]
 url = "https://brainstem.enns.dev/mcp/projects"
 bearer_token_env_var = "BRAINSTEM_API_TOKEN"
+
+[mcp_servers.laravel-boost]
+command = "php"
+args = ["artisan", "boost:mcp"]
