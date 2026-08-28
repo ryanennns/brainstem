@@ -140,7 +140,7 @@ class OAuthController extends Controller
 
         $redirectUri = $request->string('redirect_uri')->toString();
 
-        if (! in_array($redirectUri, $client['redirect_uris'], true)) {
+        if (! $this->matchesRegisteredRedirectUri($redirectUri, $client['redirect_uris'])) {
             return $this->oauthError('invalid_request', 'The redirect URI is not registered.');
         }
 
@@ -266,7 +266,8 @@ class OAuthController extends Controller
 
         if (! is_array($payload)
             || ($payload['client_id'] ?? null) !== $clientId
-            || $request->string('redirect_uri')->toString() !== ($payload['redirect_uri'] ?? null)) {
+            || ! is_string($payload['redirect_uri'] ?? null)
+            || ! $this->redirectUrisMatch($payload['redirect_uri'], $request->string('redirect_uri')->toString())) {
             return $this->oauthError('invalid_grant', 'The authorization code is invalid or expired.');
         }
 
@@ -363,6 +364,41 @@ class OAuthController extends Controller
         $host = strtolower(trim($parts['host'], '[]'));
 
         return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+    }
+
+    private function matchesRegisteredRedirectUri(string $redirectUri, array $registeredRedirectUris): bool
+    {
+        foreach ($registeredRedirectUris as $registeredRedirectUri) {
+            if (is_string($registeredRedirectUri) && $this->redirectUrisMatch($registeredRedirectUri, $redirectUri)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function redirectUrisMatch(string $registeredRedirectUri, string $redirectUri): bool
+    {
+        if ($registeredRedirectUri === $redirectUri) {
+            return true;
+        }
+
+        if (! $this->isLoopbackRedirectUri($registeredRedirectUri)
+            || ! $this->isLoopbackRedirectUri($redirectUri)) {
+            return false;
+        }
+
+        $registeredParts = parse_url($registeredRedirectUri);
+        $redirectParts = parse_url($redirectUri);
+
+        if (! is_array($registeredParts) || ! is_array($redirectParts)) {
+            return false;
+        }
+
+        return strtolower((string) $registeredParts['scheme']) === strtolower((string) $redirectParts['scheme'])
+            && ($registeredParts['port'] ?? null) === ($redirectParts['port'] ?? null)
+            && ($registeredParts['path'] ?? null) === ($redirectParts['path'] ?? null)
+            && ($registeredParts['query'] ?? null) === ($redirectParts['query'] ?? null);
     }
 
     private function isValidCodeChallenge(string $codeChallenge): bool

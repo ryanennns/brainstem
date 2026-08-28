@@ -37,6 +37,46 @@ class McpOAuthTest extends TestCase
             ->assertJsonPath('error', 'invalid_redirect_uri');
     }
 
+    public function test_codex_can_use_a_loopback_host_alias_for_a_dynamic_callback_path(): void
+    {
+        $user = User::factory()->create();
+        $registeredRedirectUri = 'http://127.0.0.1:42569/callback/Gkj-qI-HxyO4';
+        $authorizationRedirectUri = 'http://localhost:42569/callback/Gkj-qI-HxyO4';
+        $client = $this->registerClient($registeredRedirectUri);
+        $codeVerifier = Str::random(64);
+        $authorizationUrl = route('mcp.oauth.authorize').'?'.http_build_query([
+            'client_id' => $client['client_id'],
+            'code_challenge' => $this->codeChallenge($codeVerifier),
+            'code_challenge_method' => 'S256',
+            'redirect_uri' => $authorizationRedirectUri,
+            'response_type' => 'code',
+            'scope' => 'mcp:use',
+            'state' => 'test-state',
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $this->actingAs($user, 'web');
+        $consent = $this->get($authorizationUrl)->assertOk();
+
+        $authorization = $this->post(route('mcp.oauth.approve'), [
+            'authorization_token' => $consent->viewData('authToken'),
+            'decision' => 'approve',
+        ])->assertRedirect();
+
+        $location = $authorization->headers->get('Location');
+        $this->assertStringStartsWith($authorizationRedirectUri.'?', (string) $location);
+        parse_str((string) parse_url($location, PHP_URL_QUERY), $authorizationParameters);
+
+        $this->assertSame('test-state', $authorizationParameters['state']);
+
+        $this->post(route('mcp.oauth.token'), [
+            'client_id' => $client['client_id'],
+            'code' => $authorizationParameters['code'],
+            'code_verifier' => $codeVerifier,
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $registeredRedirectUri,
+        ])->assertOk();
+    }
+
     public function test_codex_can_complete_pkce_flow_and_call_the_project_server(): void
     {
         $user = User::factory()->create();
@@ -166,11 +206,11 @@ class McpOAuthTest extends TestCase
         return rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
     }
 
-    private function registerClient(): array
+    private function registerClient(string $redirectUri = 'http://127.0.0.1:43123/callback'): array
     {
         return $this->postJson('/oauth/register', [
             'client_name' => 'Codex',
-            'redirect_uris' => ['http://127.0.0.1:43123/callback'],
+            'redirect_uris' => [$redirectUri],
         ])
             ->assertCreated()
             ->json();
