@@ -10,6 +10,9 @@ class McpAuthenticationTest extends TestCase
     {
         $this->postJson('/mcp/projects')
             ->assertUnauthorized()
-            ->assertHeader('WWW-Authenticate', 'Bearer realm="mcp", error="invalid_token"');
+            ->assertHeader(
+                'WWW-Authenticate',
+                'Bearer realm="mcp", resource_metadata="'.url('/.well-known/oauth-protected-resource/mcp/projects').'"',
+            );
     }
 }
