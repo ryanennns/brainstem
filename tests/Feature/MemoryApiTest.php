@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Ai\Agents\SessionMemorySummarizer;
 use App\Models\Memory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -65,6 +66,63 @@ class MemoryApiTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['device', 'source', 'session_id', 'summary']);
 
+        $this->assertDatabaseEmpty('memories');
+    }
+
+    public function test_it_summarizes_the_session_transcript_before_storing_the_memory(): void
+    {
+        $user = User::factory()->create();
+        $summary = "Goal: Fix the build.\nOutcome: The build is passing.";
+        $transcript = "user: Please fix the broken build.\nassistant: Fixed the import and the build passes.";
+        SessionMemorySummarizer::fake([$summary]);
+
+        $this->withToken($user->createToken('session-end-hook')->plainTextToken)->postJson('/api/memories', [
+            'device' => 'workstation',
+            'source' => 'opencode',
+            'session_id' => 'ses_123',
+            'transcript' => $transcript,
+        ])->assertNoContent();
+
+        SessionMemorySummarizer::assertPrompted($transcript);
+        $this->assertDatabaseHas('memories', [
+            'user_id' => $user->getKey(),
+            'device' => 'workstation',
+            'source' => 'opencode',
+            'session_id' => 'ses_123',
+            'summary' => $summary,
+        ]);
+    }
+
+    public function test_an_empty_generated_summary_does_not_replace_an_existing_memory(): void
+    {
+        $memory = Memory::factory()->create();
+        $user = User::query()->findOrFail($memory->user_id);
+        SessionMemorySummarizer::fake(['  ']);
+
+        $this->withToken($user->createToken('session-end-hook')->plainTextToken)->postJson('/api/memories', [
+            'device' => $memory->device,
+            'source' => $memory->source,
+            'session_id' => $memory->session_id,
+            'transcript' => 'user: Did the build pass?',
+        ])->assertStatus(502);
+
+        $this->assertDatabaseHas('memories', ['id' => $memory->getKey(), 'summary' => $memory->summary]);
+    }
+
+    public function test_a_summary_and_transcript_cannot_be_submitted_together(): void
+    {
+        $user = User::factory()->create();
+        SessionMemorySummarizer::fake();
+
+        $this->withToken($user->createToken('session-end-hook')->plainTextToken)->postJson('/api/memories', [
+            'device' => 'workstation',
+            'source' => 'opencode',
+            'session_id' => 'ses_123',
+            'summary' => 'Goal: Fix the build. Outcome: Fixed.',
+            'transcript' => 'user: Fix the build.',
+        ])->assertUnprocessable()->assertJsonValidationErrors('summary');
+
+        SessionMemorySummarizer::assertNeverPrompted();
         $this->assertDatabaseEmpty('memories');
     }
 
