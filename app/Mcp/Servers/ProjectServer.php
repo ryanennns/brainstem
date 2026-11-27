@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Tools\CreateMemory;
 use App\Mcp\Tools\CreateProject;
 use App\Mcp\Tools\CreateProjectUpdate;
 use App\Mcp\Tools\CreateRepository;
@@ -27,6 +28,7 @@ use Laravel\Mcp\Server\Attributes\Version;
 class ProjectServer extends Server
 {
     protected array $tools = [
+        CreateMemory::class,
         CreateProject::class,
         CreateProjectUpdate::class,
         CreateRepository::class,

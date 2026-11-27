@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Ai\Agents\SessionMemorySummarizer;
+use App\Mcp\Servers\ProjectServer;
+use App\Mcp\Tools\CreateMemory;
 use App\Models\Memory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -126,6 +128,47 @@ class MemoryApiTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('summary');
 
         SessionMemorySummarizer::assertNeverPrompted();
+        $this->assertDatabaseEmpty('memories');
+    }
+
+    public function test_the_mcp_tool_can_refresh_a_memory_saved_through_the_api(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('memory-client')->plainTextToken;
+        $memory = [
+            'device' => 'workstation',
+            'source' => 'opencode',
+            'session_id' => 'ses_123',
+            'summary' => "Goal: Fix the build.\nOutcome: Found the cause.",
+        ];
+        $this->withToken($token)->postJson('/api/memories', $memory)->assertNoContent();
+        $id = Memory::query()->firstOrFail()->getKey();
+        $memory['summary'] = "Goal: Fix the build.\nOutcome: The build passes.";
+
+        $this->postJson('/mcp/projects', [
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'method' => 'tools/call',
+            'params' => ['name' => 'create-memory', 'arguments' => $memory],
+        ])->assertOk()->assertJsonPath('result.content.0.text', 'Session memory saved.');
+
+        $this->assertDatabaseCount('memories', 1);
+        $this->assertDatabaseHas('memories', $memory + ['id' => $id, 'user_id' => $user->getKey()]);
+    }
+
+    public function test_the_mcp_tool_requires_a_supported_source_and_nonempty_summary(): void
+    {
+        $user = User::factory()->create();
+        ProjectServer::actingAs($user)->tool(CreateMemory::class, [
+            'device' => 'workstation',
+            'source' => 'unsupported',
+            'session_id' => 'ses_123',
+            'summary' => '  ',
+        ])->assertHasErrors([
+            'The selected source is invalid.',
+            'The summary field is required.',
+        ]);
+
         $this->assertDatabaseEmpty('memories');
     }
 
