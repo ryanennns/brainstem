@@ -32,7 +32,8 @@ class MemoryApiTest extends TestCase
     public function test_repeated_completion_updates_the_same_memory_without_affecting_other_users_or_sources(): void
     {
         $user = User::factory()->create();
-        $existing = Memory::factory()->create(['user_id' => $user->getKey()]);
+        $memoryAttributes = Memory::factory()->raw(['user_id' => $user->getKey()]);
+        $existing = Memory::query()->create($memoryAttributes);
         $otherSource = Memory::factory()->create([
             'user_id' => $user->getKey(),
             'source' => 'ignition',
