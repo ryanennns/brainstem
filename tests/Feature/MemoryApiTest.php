@@ -6,6 +6,7 @@ use App\Ai\Agents\SessionMemorySummarizer;
 use App\Models\Memory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -27,6 +28,7 @@ class MemoryApiTest extends TestCase
         $this->withToken($token)->postJson('/api/memories', $memory)->assertNoContent();
 
         $this->assertDatabaseHas('memories', array_replace($memory, ['user_id' => $user->getKey()]));
+        $this->assertTrue(Str::isUuid(Memory::query()->firstOrFail()->getKey()));
     }
 
     public function test_repeated_completion_updates_the_same_memory_without_affecting_other_users_or_sources(): void
