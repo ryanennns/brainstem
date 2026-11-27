@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SignInController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\Memories\StoreMemoryController;
 use App\Http\Controllers\Projects\DestroyProjectController;
 use App\Http\Controllers\Projects\IndexProjectController;
 use App\Http\Controllers\Projects\ShowProjectController;
@@ -15,6 +16,8 @@ Route::post('sign-up', SignUpController::class);
 Route::post('sign-in', SignInController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('memories', StoreMemoryController::class);
+
     Route::prefix('projects')->group(function () {
         Route::get('/', IndexProjectController::class);
         Route::post('/', StoreProjectController::class);
